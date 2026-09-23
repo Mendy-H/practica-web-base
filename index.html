@@ -18,7 +18,17 @@
     
     <!-- Catálogo de productos -->
     <section>
-      <h2 class="text-xl font-bold mb-4 text-gray-800">Catálogo</h2>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+        <h2 class="text-xl font-bold text-gray-800">Catálogo</h2>
+        
+        <!-- Botones de filtro por categoría -->
+        <div id="filtros" class="flex flex-wrap gap-2">
+          <button data-categoria="Todos" class="btn-filtro bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors">Todos</button>
+          <button data-categoria="Joyería" class="btn-filtro bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium py-1 px-3 rounded text-sm transition-colors">Joyería</button>
+          <button data-categoria="Accesorios" class="btn-filtro bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium py-1 px-3 rounded text-sm transition-colors">Accesorios</button>
+        </div>
+      </div>
+
       <div id="catalogo" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       </div>
     </section>

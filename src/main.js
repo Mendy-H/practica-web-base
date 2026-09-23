@@ -6,6 +6,7 @@ const catalogo = document.getElementById('catalogo')
 const listaPedidoEl = document.getElementById('lista-pedido')
 const totalPedidoEl = document.getElementById('total-pedido')
 const btnVaciar = document.getElementById('btn-vaciar')
+const contenedorFiltros = document.getElementById('filtros')
 
 // Arreglo para guardar los productos seleccionados
 let pedido = []
@@ -34,8 +35,6 @@ mostrarProductos(productos)
 // ------------------------------------------------------------
 // EJERCICIO 3 — Armar el pedido
 // ------------------------------------------------------------
-
-// Renderiza el pedido y calcula el total con reduce
 function mostrarPedido() {
   if (pedido.length === 0) {
     listaPedidoEl.innerHTML = '<li class="py-2 text-gray-500 italic">El pedido está vacío</li>'
@@ -43,7 +42,6 @@ function mostrarPedido() {
     return
   }
 
-  // Dibujar lista de items agregados
   listaPedidoEl.innerHTML = pedido.map(p => `
     <li class="py-2 flex justify-between items-center text-gray-700">
       <span>${p.nombre}</span>
@@ -51,12 +49,10 @@ function mostrarPedido() {
     </li>
   `).join('')
 
-  // Calcular total usando .reduce()
   const total = pedido.reduce((suma, p) => suma + p.precio, 0)
   totalPedidoEl.textContent = total
 }
 
-// Delegación de eventos para agregar productos al hacer clic en el botón
 catalogo.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-agregar')) {
     const id = Number(e.target.dataset.id)
@@ -69,8 +65,30 @@ catalogo.addEventListener('click', (e) => {
   }
 })
 
-// Botón para vaciar el pedido
 btnVaciar.addEventListener('click', () => {
   pedido = []
   mostrarPedido()
+})
+
+// ------------------------------------------------------------
+// EJERCICIO 4 — Filtrar por categoría
+// ------------------------------------------------------------
+contenedorFiltros.addEventListener('click', (e) => {
+  if (e.target.classList.contains('btn-filtro')) {
+    const categoria = e.target.dataset.categoria
+
+    // Cambiar estilos de los botones
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+      btn.className = 'btn-filtro bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium py-1 px-3 rounded text-sm transition-colors'
+    })
+    e.target.className = 'btn-filtro bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors'
+
+    // Filtrar los productos
+    if (categoria === 'Todos') {
+      mostrarProductos(productos)
+    } else {
+      const productosFiltrados = productos.filter(p => p.categoria === categoria)
+      mostrarProductos(productosFiltrados)
+    }
+  }
 })
