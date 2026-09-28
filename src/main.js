@@ -8,6 +8,17 @@ const totalPedidoEl = document.getElementById('total-pedido')
 const btnVaciar = document.getElementById('btn-vaciar')
 const contenedorFiltros = document.getElementById('filtros')
 
+// Elementos del formulario de cliente (Ejercicio 5)
+const formCliente = document.getElementById('form-cliente')
+const inputNombre = document.getElementById('nombre')
+const inputTelefono = document.getElementById('telefono')
+const inputCorreo = document.getElementById('correo')
+
+const errorNombre = document.getElementById('error-nombre')
+const errorTelefono = document.getElementById('error-telefono')
+const errorCorreo = document.getElementById('error-correo')
+const errorPedido = document.getElementById('error-pedido')
+
 // Arreglo para guardar los productos seleccionados
 let pedido = []
 
@@ -42,7 +53,6 @@ function mostrarPedido() {
     return
   }
 
-  // Renderiza cada ítem con un botón de eliminar individual (EXTRA)
   listaPedidoEl.innerHTML = pedido.map((p, index) => `
     <li class="py-2 flex justify-between items-center text-gray-700 border-b border-gray-100 last:border-none">
       <div>
@@ -74,11 +84,11 @@ catalogo.addEventListener('click', (e) => {
   }
 })
 
-// EXTRA: Delegación de eventos para eliminar un ítem individual del pedido
+// Delegación de eventos para eliminar un ítem
 listaPedidoEl.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-eliminar')) {
     const index = Number(e.target.dataset.index)
-    pedido.splice(index, 1) // Remueve el elemento seleccionado en la posición 'index'
+    pedido.splice(index, 1)
     mostrarPedido()
   }
 })
@@ -109,3 +119,53 @@ contenedorFiltros.addEventListener('click', (e) => {
     }
   }
 })
+
+// ------------------------------------------------------------
+// EJERCICIO 5 — Validación del Formulario de Cliente
+// ------------------------------------------------------------
+formCliente.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+
+  let esValido = true;
+
+  const nombreVal = inputNombre.value.trim();
+  if (!nombreVal) {
+    errorNombre.classList.remove('hidden');
+    inputNombre.classList.add('border-red-500');
+    esValido = false;
+  } else {
+    errorNombre.classList.add('hidden');
+    inputNombre.classList.remove('border-red-500');
+  }
+
+  const telefonoVal = inputTelefono.value.trim();
+  if (!/^\d{10}$/.test(telefonoVal)) {
+    errorTelefono.classList.remove('hidden');
+    inputTelefono.classList.add('border-red-500');
+    esValido = false;
+  } else {
+    errorTelefono.classList.add('hidden');
+    inputTelefono.classList.remove('border-red-500');
+  }
+
+  const correoVal = inputCorreo.value.trim();
+  if (!/^\S+@\S+\.\S+$/.test(correoVal)) {
+    errorCorreo.classList.remove('hidden');
+    inputCorreo.classList.add('border-red-500');
+    esValido = false;
+  } else {
+    errorCorreo.classList.add('hidden');
+    inputCorreo.classList.remove('border-red-500');
+  }
+
+  if (pedido.length === 0) {
+    errorPedido.classList.remove('hidden');
+    esValido = false;
+  } else {
+    errorPedido.classList.add('hidden');
+  }
+
+  if (esValido) {
+    console.log('Datos válidos, listo para registrar pedido');
+  }
+});
