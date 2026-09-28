@@ -22,17 +22,38 @@ const errorPedido = document.getElementById('error-pedido')
 // Ejercicio 6: contenedor de pedidos registrados
 const contenedorPedidos = document.getElementById('pedidos-registrados')
 
+// Ejercicio 7: contenedor de filtros por estado
+const contenedorFiltrosEstado = document.getElementById('filtros-estado')
+
 // Arreglo para guardar los productos seleccionados
 let pedido = []
 
-// Ejercicio 6: pedidos registrados, estados y colores
-const pedidosRegistrados = []
+// Ejercicio 6: estados y colores
 const ESTADOS = ['Pendiente', 'En preparación', 'Entregado']
 const COLORES = {
   'Pendiente': 'bg-yellow-100 border-yellow-400',
   'En preparación': 'bg-blue-100 border-blue-400',
   'Entregado': 'bg-green-100 border-green-400'
 }
+
+// Ejercicio 7: localStorage (los pedidos registrados sobreviven al recargar)
+function cargarPedidos() {
+  try {
+    return JSON.parse(localStorage.getItem('pedidosRegistrados')) || []
+  } catch {
+    return []
+  }
+}
+
+function guardarPedidos() {
+  localStorage.setItem('pedidosRegistrados', JSON.stringify(pedidosRegistrados))
+}
+
+// Ejercicio 6 y 7: pedidos registrados (se cargan de localStorage al abrir la página)
+const pedidosRegistrados = cargarPedidos()
+
+// Ejercicio 7: filtro de estado seleccionado
+let filtroEstado = 'Todos'
 
 // ------------------------------------------------------------
 // EJERCICIO 2 — Mostrar Catálogo
@@ -192,6 +213,9 @@ formCliente.addEventListener('submit', (evento) => {
       estado: 'Pendiente'
     });
 
+    // Ejercicio 7: guardar en localStorage
+    guardarPedidos();
+
     // Vaciar el pedido, limpiar el formulario y redibujar
     pedido = [];
     formCliente.reset();
@@ -201,15 +225,47 @@ formCliente.addEventListener('submit', (evento) => {
 });
 
 // ------------------------------------------------------------
+// EJERCICIO 7 — Filtros por estado con contador
+// ------------------------------------------------------------
+function mostrarFiltrosEstado() {
+  const opciones = ['Todos', ...ESTADOS]
+
+  contenedorFiltrosEstado.innerHTML = opciones.map(op => {
+    const cantidad = op === 'Todos'
+      ? pedidosRegistrados.length
+      : pedidosRegistrados.filter(p => p.estado === op).length
+
+    const clases = op === filtroEstado
+      ? 'bg-blue-600 text-white'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+
+    return `<button data-estado="${op}" class="${clases} font-medium py-1 px-3 rounded text-sm transition-colors">${op} (${cantidad})</button>`
+  }).join('')
+}
+
+contenedorFiltrosEstado.addEventListener('click', (e) => {
+  const estado = e.target.dataset.estado
+  if (!estado) return
+  filtroEstado = estado
+  mostrarPedidosRegistrados()
+})
+
+// ------------------------------------------------------------
 // EJERCICIO 6 — Pedidos registrados con estado
 // ------------------------------------------------------------
 function mostrarPedidosRegistrados() {
-  if (pedidosRegistrados.length === 0) {
-    contenedorPedidos.innerHTML = '<p class="text-gray-500 italic">Aún no hay pedidos registrados.</p>'
+  mostrarFiltrosEstado()
+
+  const visibles = filtroEstado === 'Todos'
+    ? pedidosRegistrados
+    : pedidosRegistrados.filter(p => p.estado === filtroEstado)
+
+  if (visibles.length === 0) {
+    contenedorPedidos.innerHTML = '<p class="text-gray-500 italic">No hay pedidos para mostrar.</p>'
     return
   }
 
-  contenedorPedidos.innerHTML = pedidosRegistrados.map(p => `
+  contenedorPedidos.innerHTML = visibles.map(p => `
     <div class="border-2 rounded-lg p-4 shadow-sm ${COLORES[p.estado]}">
       <p class="font-bold text-gray-800">${p.cliente.nombre}</p>
       <ul class="text-sm text-gray-700 my-2 list-disc list-inside">
@@ -235,9 +291,10 @@ contenedorPedidos.addEventListener('click', (e) => {
   const posicion = ESTADOS.indexOf(pedidoEncontrado.estado)
   if (posicion < ESTADOS.length - 1) {
     pedidoEncontrado.estado = ESTADOS[posicion + 1]
+    guardarPedidos()
   }
   mostrarPedidosRegistrados()
 })
 
-// Dibujar el estado inicial
+// Dibujar el estado inicial (incluye los pedidos guardados en localStorage)
 mostrarPedidosRegistrados()
