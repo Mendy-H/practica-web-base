@@ -19,8 +19,20 @@ const errorTelefono = document.getElementById('error-telefono')
 const errorCorreo = document.getElementById('error-correo')
 const errorPedido = document.getElementById('error-pedido')
 
+// Ejercicio 6: contenedor de pedidos registrados
+const contenedorPedidos = document.getElementById('pedidos-registrados')
+
 // Arreglo para guardar los productos seleccionados
 let pedido = []
+
+// Ejercicio 6: pedidos registrados, estados y colores
+const pedidosRegistrados = []
+const ESTADOS = ['Pendiente', 'En preparación', 'Entregado']
+const COLORES = {
+  'Pendiente': 'bg-yellow-100 border-yellow-400',
+  'En preparación': 'bg-blue-100 border-blue-400',
+  'Entregado': 'bg-green-100 border-green-400'
+}
 
 // ------------------------------------------------------------
 // EJERCICIO 2 — Mostrar Catálogo
@@ -122,6 +134,7 @@ contenedorFiltros.addEventListener('click', (e) => {
 
 // ------------------------------------------------------------
 // EJERCICIO 5 — Validación del Formulario de Cliente
+// (+ EJERCICIO 6: registrar el pedido cuando es válido)
 // ------------------------------------------------------------
 formCliente.addEventListener('submit', (evento) => {
   evento.preventDefault();
@@ -166,6 +179,65 @@ formCliente.addEventListener('submit', (evento) => {
   }
 
   if (esValido) {
-    console.log('Datos válidos, listo para registrar pedido');
+    // Ejercicio 6: registrar el pedido con una COPIA de los productos
+    pedidosRegistrados.push({
+      id: Date.now(),
+      cliente: {
+        nombre: nombreVal,
+        telefono: telefonoVal,
+        correo: correoVal
+      },
+      productos: [...pedido],
+      total: pedido.reduce((suma, p) => suma + p.precio, 0),
+      estado: 'Pendiente'
+    });
+
+    // Vaciar el pedido, limpiar el formulario y redibujar
+    pedido = [];
+    formCliente.reset();
+    mostrarPedido();
+    mostrarPedidosRegistrados();
   }
 });
+
+// ------------------------------------------------------------
+// EJERCICIO 6 — Pedidos registrados con estado
+// ------------------------------------------------------------
+function mostrarPedidosRegistrados() {
+  if (pedidosRegistrados.length === 0) {
+    contenedorPedidos.innerHTML = '<p class="text-gray-500 italic">Aún no hay pedidos registrados.</p>'
+    return
+  }
+
+  contenedorPedidos.innerHTML = pedidosRegistrados.map(p => `
+    <div class="border-2 rounded-lg p-4 shadow-sm ${COLORES[p.estado]}">
+      <p class="font-bold text-gray-800">${p.cliente.nombre}</p>
+      <ul class="text-sm text-gray-700 my-2 list-disc list-inside">
+        ${p.productos.map(prod => `<li>${prod.nombre}</li>`).join('')}
+      </ul>
+      <p class="font-semibold text-gray-800">Total: $${p.total}.00</p>
+      <p class="text-sm text-gray-700 mt-1">Estado: <strong>${p.estado}</strong></p>
+      ${p.estado !== 'Entregado'
+        ? `<button data-avanzar="${p.id}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition-colors">Avanzar estado</button>`
+        : ''}
+    </div>
+  `).join('')
+}
+
+// Delegación de eventos: avanzar el estado de un pedido
+contenedorPedidos.addEventListener('click', (e) => {
+  const id = e.target.dataset.avanzar
+  if (!id) return
+
+  const pedidoEncontrado = pedidosRegistrados.find(p => p.id === Number(id))
+  if (!pedidoEncontrado) return
+
+  const posicion = ESTADOS.indexOf(pedidoEncontrado.estado)
+  if (posicion < ESTADOS.length - 1) {
+    pedidoEncontrado.estado = ESTADOS[posicion + 1]
+  }
+  mostrarPedidosRegistrados()
+})
+
+// Dibujar el estado inicial
+mostrarPedidosRegistrados()
